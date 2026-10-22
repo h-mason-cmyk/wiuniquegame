@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WIUnique: Special Education Edition</title>
+    <style>
+        /* --- RESETS & WIU BRAND THEME COLORS --- */
+        :root {
+            --wiu-purple: #4F2683;
+            --wiu-dark-purple: #230c3d;
+            --wiu-deep-bg: #140624;
+            --wiu-gold: #FFC72C;
+            --wiu-gold-light: #ffe180;
+            --wiu-red: #ef4444;
+            --wiu-green: #22c55e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: radial-gradient(circle at center, #2e124d 0%, var(--wiu-deep-bg) 100%);
+            color: #ffffff;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            cursor: pointer;
+        }
+
+        /* --- GLASSMORPHISM UI OVERLAYS --- */
+        .ui-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 12px;
+        }
+
+        .interactive {
+            pointer-events: auto;
+        }
+
+        .glass-panel {
+            background: rgba(79, 38, 131, 0.45);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1.5px solid rgba(255, 199, 44, 0.4);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 10px;
+        }
+
+        /* HEADER & DASHBOARD */
+        header {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .dashboard {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            gap: 10px;
+        }
+
+        .brand-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-badge {
+            background: linear-gradient(135deg, var(--wiu-gold), #e6aa00);
+            color: var(--wiu-dark-purple);
+            font-weight: 900;
+            font-size: 16px;
+            padding: 6px 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            border: 1px solid #ffffff;
+        }
+
+        .title-text h1 {
+            font-size: 16px;
+            font-weight: 800;
+            line-height: 1.1;
+            color: #ffffff;
+        }
+
+        .title-text h1 span {
+            color: var(--wiu-gold);
+        }
+
+        .title-text p {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .stats-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 4px 10px;
+            text-align: center;
+            min-width: 58px;
+        }
+
+        .stat-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--wiu-gold);
+            line-height: 1.1;
+        }
+
+        .stat-value.score {
+            color: #4ade80;
+        }
+
+        /* BUTTONS */
+        .btn {
+            background: linear-gradient(135deg, var(--wiu-gold) 0%, #f59e0b 100%);
+            color: var(--wiu-dark-purple);
+            font-weight: 800;
+            font-size: 14px;
+            padding: 10px 18px;
+            border-radius: 12px;
+            border: 1.5px solid rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+            box-shadow: 0 4px 15px rgba(255, 199, 44, 0.3);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.08);
+            box-shadow: 0 6px 20px rgba(255, 199, 44, 0.5);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--wiu-gold);
+            border: 1px solid rgba(255, 199, 44, 0.5);
+            box-shadow: none;
+            font-size: 12px;
+            padding: 8px 12px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 199, 44, 0.2);
+            box-shadow: 0 2px 10px rgba(255, 199, 44, 0.2);
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--wiu-gold);
+            border-radius: 10px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        /* PROGRESS BAR */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            margin-top: 6px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, var(--wiu-gold) 0%, #f59e0b 100%);
+            transition: width 0.3s linear;
+        }
+
+        /* MODAL OVERLAYS */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 3, 20, 0.82);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            opacity: 1;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+            display: none;
+        }
+
+        .modal-box {
+            max-width: 520px;
+            width: 100%;
+            padding: 24px;
+            text-align: center;
+            position: relative;
+            animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.88); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 900;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        .modal-subtitle {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--wiu-gold);
+            margin-bottom: 14px;
+        }
+
+        .instruction-box {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            padding: 14px;
+            text-align: left;
+            font-size: 13px;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 18px;
+        }
+
+        .instruction-box ul {
+            padding-left: 18px;
+            margin-top: 6px;
+        }
+
+        .instruction-box li {
+            margin-bottom: 6px;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* CHEAT SHEET TABLE LIST */
+        .cheat-sheet-content {
+            overflow-y: auto;
+            max-height: 55vh;
+            text-align: left;
+            padding-right: 6px;
+            margin-bottom: 16px;
+        }
+
+        .cheat-sheet-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        .cheat-sheet-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 199, 44, 0.4);
+            border-radius: 4px;
+        }
+
+        .cheat-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        @media (min-width: 520px) {
+            .cheat-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .cheat-column-has {
+            background: rgba(34, 197, 94, 0.12);
+            border: 1px solid rgba(34, 197, 94, 0.35);
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .cheat-column-has h4 {
+            color: #4ade80;
+            font-size: 13px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .cheat-column-not {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .cheat-column-not h4 {
+            color: #f87171;
+            font-size: 13px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .cheat-list {
+            list-style: none;
+            font-size: 11px;
+            line-height: 1.4;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .cheat-list li {
+            margin-bottom: 6px;
+            position: relative;
+            padding-left: 12px;
+        }
+
+        .cheat-list li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--wiu-gold);
+        }
+
+        /* INCORRECT PENALTY MODAL */
+        .penalty-modal {
+            border: 2px solid var(--wiu-red);
+            background: linear-gradient(180deg, rgba(60, 10, 20, 0.95) 0%, rgba(30, 5, 40, 0.95) 100%);
+        }
+
+        .penalty-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid var(--wiu-red);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px auto;
+            color: var(--wiu-red);
+            font-size: 24px;
+            font-weight: 900;
+        }
+
+        .item-quote {
+            background: rgba(0, 0, 0, 0.5);
+            border-left: 4px solid var(--wiu-red);
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin: 12px 0 16px 0;
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--wiu-gold);
+            text-align: center;
+            font-style: italic;
+        }
+
+        /* GAME OVER STATS GRID */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .stat-card-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .stat-card-value {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--wiu-gold);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CANVAS ENGINE -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- DASHBOARD UI LAYER -->
+    <div class="ui-layer">
+        <header class="interactive">
+            <div class="glass-panel dashboard">
+                <div class="brand-title">
+                    <div class="brand-badge">WIU</div>
+                    <div class="title-text">
+                        <h1>WIUnique: <span>Special Ed</span></h1>
+                        <p>Pop WIU SPE features &amp; let myths float away!</p>
+                    </div>
+                </div>
+
+                <div class="stats-group">
+                    <div class="stat-box">
+                        <div class="stat-label">Time</div>
+                        <div id="timerDisplay" class="stat-value">60s</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Score</div>
+                        <div id="scoreDisplay" class="stat-value score">0</div>
+                    </div>
+                    <button id="cheatSheetBtn" class="btn btn-secondary">📋 Cheat Sheet</button>
+                    <button id="soundBtn" class="icon-btn">🔊</button>
+                </div>
+            </div>
+            <div class="progress-container">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+        </header>
+    </div>
+
+    <!-- START GAME MODAL -->
+    <div id="startModal" class="modal-overlay">
+        <div class="glass-panel modal-box">
+            <div class="modal-title">WIUnique</div>
+            <div class="modal-subtitle">Special Education Edition</div>
+
+            <div class="instruction-box">
+                <strong>🎯 Game Rules:</strong>
+                <ul>
+                    <li>You have <strong style="color:var(--wiu-gold);">60 seconds</strong> to pop as many correct bubbles as possible.</li>
+                    <li><strong style="color:#4ade80;">POP</strong> bubbles that contain things WIU's Special Education Program <strong style="color:#4ade80;">DOES</strong> have (<span style="color:#4ade80; font-weight:bold;">+10 pts</span>).</li>
+                    <li><strong style="color:#f87171;">LET FLOAT AWAY</strong> any bubbles describing things WIU <strong style="color:#f87171;">DOES NOT</strong> feature!</li>
+                    <li>Popping an incorrect bubble costs <span style="color:#f87171; font-weight:bold;">-5 pts</span> and pauses the game for 5 seconds.</li>
+                </ul>
+            </div>
+
+            <div class="button-row">
+                <button id="startCheatBtn" class="btn btn-secondary" style="font-size:13px; padding:12px 16px;">📋 Review Cheat Sheet</button>
+                <button id="startGameBtn" class="btn" style="font-size:16px; padding:12px 24px;">🚀 START GAME</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHEAT SHEET MODAL -->
+    <div id="cheatSheetModal" class="modal-overlay hidden">
+        <div class="glass-panel modal-box" style="max-width: 620px;">
+            <div class="modal-title" style="font-size:20px;">Program Cheat Sheet</div>
+            <div class="modal-subtitle" style="font-size:13px; margin-bottom:10px;">What WIU Special Education Offers vs. Mythical Items</div>
+
+            <div class="cheat-sheet-content">
+                <div class="cheat-grid">
+                    <div class="cheat-column-has">
+                        <h4>✓ WIU DOES HAVE (+10)</h4>
+                        <ul class="cheat-list">
+                            <li>Motor clinic with area students with disabilities</li>
+                            <li>High collaboration opportunities between students</li>
+                            <li>Faculty that work well together</li>
+                            <li>Creative programming &amp; flexible assignments</li>
+                            <li>Multiple field work courses &amp; extra field work</li>
+                            <li>Federal level advocacy opportunities</li>
+                            <li>Availability of students with disabilities on campus</li>
+                            <li>Professors who value your feedback</li>
+                            <li>Professors comfortable being goofy &amp; accessible</li>
+                            <li>Opportunities to learn in the community</li>
+                            <li>Networking with area teachers &amp; local admins</li>
+                            <li>Fun events with food</li>
+                            <li>Council for Exceptional Children student chapter</li>
+                            <li>Career-useful &amp; authentic assignments</li>
+                            <li>Content exam preparation &amp; deep reflection</li>
+                        </ul>
+                    </div>
+
+                    <div class="cheat-column-not">
+                        <h4>✕ WIU DOES NOT HAVE (-5)</h4>
+                        <ul class="cheat-list">
+                            <li>Only boring lectures</li>
+                            <li>Faculty who get into loud arguments</li>
+                            <li>Siloed programs with zero student interaction</li>
+                            <li>Truly cringy professors</li>
+                            <li>Only monotone professors</li>
+                            <li>Really long essay assignments unrelated to teaching</li>
+                            <li>Really hard, punishing midterms</li>
+                            <li>Technology free courses</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-row">
+                <button id="closeCheatBtn" class="btn" style="width:100%;">Got It! Resume Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- INCORRECT PENALTY MODAL -->
+    <div id="penaltyModal" class="modal-overlay hidden">
+        <div class="glass-panel modal-box penalty-modal" style="max-width: 440px;">
+            <div class="penalty-icon">✕</div>
+            <div class="modal-title" style="color:#f87171; font-size:20px;">Misconception Alert!</div>
+            <div style="font-size:13px; color:rgba(255,255,255,0.85); margin-top:4px;">
+                Sorry! WIU's Special Education program does <strong style="color:#f87171;">NOT</strong> feature:
+            </div>
+
+            <div id="penaltyQuote" class="item-quote">
+                "Only boring lectures"
+            </div>
+
+            <div style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:14px;">
+                Let non-WIU features float away off the screen!
+            </div>
+
+            <button id="dismissPenaltyBtn" class="btn btn-secondary" style="width:100%; color:#ffffff; border-color:rgba(255,255,255,0.3);">
+                Continue (<span id="penaltyCountdown">5</span>s)
+            </button>
+        </div>
+    </div>
+
+    <!-- GAME OVER MODAL -->
+    <div id="gameOverModal" class="modal-overlay hidden">
+        <div class="glass-panel modal-box">
+            <div class="modal-title">Time's Up!</div>
+            <div id="endTitle" class="modal-subtitle">WIU Special Ed Champion!</div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-label">Final Score</div>
+                    <div id="finalScore" class="stat-card-value">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-label">Accuracy</div>
+                    <div id="finalAccuracy" class="stat-card-value" style="color:#38bdf8;">0%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-label">Correct Pops</div>
+                    <div id="finalCorrect" class="stat-card-value" style="color:#4ade80;">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-label">Incorrect Pops</div>
+                    <div id="finalIncorrect" class="stat-card-value" style="color:#f87171;">0</div>
+                </div>
+            </div>
+
+            <div id="endFeedback" class="instruction-box" style="text-align:center; font-size:13px; margin-bottom:16px;">
+                You know Western Illinois University's Special Education program inside and out!
+            </div>
+
+            <div class="button-row">
+                <button id="endCheatBtn" class="btn btn-secondary">Review Cheat Sheet</button>
+                <button id="restartGameBtn" class="btn">🔄 PLAY AGAIN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GAME CODE ENGINE -->
+    <script>
+        // --- DATA ARRAYS ---
+        const CORRECT_ITEMS = [
+            "Motor clinic with area students with disabilities",
+            "High collaboration opportunities between students",
+            "Faculty that work well together",
+            "Creative programming",
+            "Multiple field work courses",
+            "Additional field work outside of courses",
+            "Opportunities for advocacy on the federal level",
+            "Availability of students with disabilities to work with on campus",
+            "Professors who value your feedback",
+            "Professors who feel comfortable being a little goofy",
+            "Professors who don't take themselves TOO seriously",
+            "Flexible assignments",
+            "Opportunities to learn in the community",
+            "Networking with area special education teachers",
+            "Networking with local administrators",
+            "Fun events with food",
+            "Council for Exceptional Children student chapter",
+            "Assignments that are useful to your future career",
+            "Opportunities to learn authentically",
+            "Content exam preparation",
+            "Opportunities to think and reflect deeply"
+        ];
+
+        const INCORRECT_ITEMS = [
+            "Only boring lectures",
+            "Faculty who get into loud arguments",
+            "Siloed programs that don't allow for student interactions",
+            "Truly cringy professors",
+            "Only monotone professors",
+            "Really long essay assignments that have nothing to do with teaching",
+            "Really hard midterms",
+            "Technology free courses"
+        ];
+
+        // --- AUDIO SYNTHESIZER ---
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) this.ctx = new AudioCtx();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            playPop() {
+                if (this.muted || !this.ctx) return;
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(320, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } catch(e) {}
+            }
+
+            playError() {
+                if (this.muted || !this.ctx) return;
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.setValueAtTime(110, now + 0.2);
+
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                } catch(e) {}
+            }
+
+            playEnd() {
+                if (this.muted || !this.ctx) return;
+                try {
+                    const notes = [261.63, 329.63, 392.00, 523.25];
+                    notes.forEach((freq, idx) => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.value = freq;
+                        const now = this.ctx.currentTime + (idx * 0.09);
+                        gain.gain.setValueAtTime(0.2, now);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(now);
+                        osc.stop(now + 0.25);
+                    });
+                } catch(e) {}
+            }
+        }
+
+        const audio = new SoundEngine();
+
+        // --- GAME STATE ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = 0;
+        let height = 0;
+
+        let gameState = 'START'; // START, PLAYING, PAUSED_PENALTY, CHEAT_SHEET, GAMEOVER
+        let stateBeforeCheat = 'START';
+
+        let score = 0;
+        let highScore = parseInt(localStorage.getItem('wiu_spe_game_high') || '0', 10);
+        let timeLeft = 60;
+        let correctPops = 0;
+        let incorrectPops = 0;
+        let totalAttempts = 0;
+
+        let mainTimer = null;
+        let penaltyTimer = null;
+        let penaltySecondsLeft = 5;
+
+        let bubbles = [];
+        let particles = [];
+        let floatingTexts = [];
+
+        let spawnCounter = 0;
+        let spawnInterval = 60;
+
+        // --- RESIZE CANVAS ---
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width * (window.devicePixelRatio || 1);
+            canvas.height = height * (window.devicePixelRatio || 1);
+            ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // --- BUBBLE CLASS ---
+        class Bubble {
+            constructor() {
+                // 70% correct, 30% incorrect
+                this.isCorrect = Math.random() < 0.70;
+                this.text = this.isCorrect 
+                    ? CORRECT_ITEMS[Math.floor(Math.random() * CORRECT_ITEMS.length)]
+                    : INCORRECT_ITEMS[Math.floor(Math.random() * INCORRECT_ITEMS.length)];
+
+                const baseRadius = width < 600 ? 44 : 54;
+                this.radius = baseRadius + Math.min(this.text.length * 0.6, 22);
+
+                // Find non-overlapping initial position at bottom of canvas
+                let validPos = false;
+                let attempts = 0;
+                let testX = 0;
+                let testY = 0;
+
+                while (!validPos && attempts < 25) {
+                    attempts++;
+                    testX = this.radius + Math.random() * (width - this.radius * 2);
+                    testY = height + this.radius + Math.random() * 60;
+
+                    validPos = true;
+                    for (let b of bubbles) {
+                        const dist = Math.hypot(testX - b.x, testY - b.y);
+                        if (dist < (this.radius + b.radius + 15)) {
+                            validPos = false;
+                            break;
+                        }
+                    }
+                }
+
+                this.x = testX;
+                this.y = testY;
+
+                // Slower upward float velocity for comfortable readability
+                this.vy = -(0.5 + Math.random() * 0.4); 
+                this.vx = 0;
+                this.wobbleSpeed = 0.015 + Math.random() * 0.02;
+                this.wobbleAmp = 8 + Math.random() * 10;
+                this.startX = this.x;
+                this.angle = Math.random() * Math.PI * 2;
+
+                this.isRed = false;
+                this.shake = 0;
+            }
+
+            update() {
+                this.angle += this.wobbleSpeed;
+                // Gently shift base center line while keeping overall trajectory upward
+                this.startX += this.vx;
+                this.x = this.startX + Math.sin(this.angle) * this.wobbleAmp;
+                this.y += this.vy;
+
+                // Dampen horizontal push velocities from collisions
+                this.vx *= 0.92;
+
+                // Screen boundary constraints
+                if (this.x - this.radius < 10) {
+                    this.startX = 10 + this.radius;
+                } else if (this.x + this.radius > width - 10) {
+                    this.startX = width - 10 - this.radius;
+                }
+
+                if (this.shake > 0) {
+                    this.shake--;
+                    this.x += (Math.random() - 0.5) * 8;
+                }
+            }
+
+            draw(c) {
+                c.save();
+                c.translate(this.x, this.y);
+
+                // ALL FLOATING BUBBLES LOOK EXACTLY THE SAME (WIU Purple Glassmorphism)
+                const grad = c.createRadialGradient(
+                    -this.radius * 0.3, -this.radius * 0.3, this.radius * 0.1,
+                    0, 0, this.radius
+                );
+
+                if (this.isRed) {
+                    // Turn red ONLY after being incorrectly popped
+                    grad.addColorStop(0, 'rgba(255, 120, 120, 0.95)');
+                    grad.addColorStop(0.6, 'rgba(220, 38, 38, 0.9)');
+                    grad.addColorStop(1, 'rgba(127, 29, 29, 0.95)');
+                } else {
+                    grad.addColorStop(0, 'rgba(255, 255, 255, 0.45)');
+                    grad.addColorStop(0.4, 'rgba(79, 38, 131, 0.65)');
+                    grad.addColorStop(1, 'rgba(20, 6, 36, 0.85)');
+                }
+
+                c.beginPath();
+                c.arc(0, 0, this.radius, 0, Math.PI * 2);
+                c.fillStyle = grad;
+                c.fill();
+
+                // Shiny Outline (Gold vs Red)
+                c.lineWidth = this.isRed ? 4 : 2.5;
+                c.strokeStyle = this.isRed ? '#ef4444' : '#FFC72C';
+                c.stroke();
+
+                // Specular highlight arc
+                c.beginPath();
+                c.ellipse(-this.radius * 0.35, -this.radius * 0.35, this.radius * 0.28, this.radius * 0.14, -Math.PI / 4, 0, Math.PI * 2);
+                c.fillStyle = 'rgba(255, 255, 255, 0.55)';
+                c.fill();
+
+                // Text
+                c.fillStyle = '#ffffff';
+                c.font = `600 ${width < 600 ? '11px' : '12.5px'} -apple-system, sans-serif`;
+                c.textAlign = 'center';
+                c.textBaseline = 'middle';
+
+                this.drawText(c, this.text, 0, 0, this.radius * 1.65, 14);
+
+                c.restore();
+            }
+
+            drawText(c, text, x, y, maxWidth, lineHeight) {
+                const words = text.split(' ');
+                let lines = [];
+                let line = words[0];
+
+                for (let i = 1; i < words.length; i++) {
+                    const testLine = line + " " + words[i];
+                    if (c.measureText(testLine).width < maxWidth) {
+                        line = testLine;
+                    } else {
+                        lines.push(line);
+                        line = words[i];
+                    }
+                }
+                lines.push(line);
+
+                const startY = y - ((lines.length - 1) * lineHeight) / 2;
+                lines.forEach((l, idx) => {
+                    c.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                    c.fillText(l, x + 1, startY + (idx * lineHeight) + 1);
+                    c.fillStyle = '#ffffff';
+                    c.fillText(l, x, startY + (idx * lineHeight));
+                });
+            }
+
+            contains(px, py) {
+                const dx = px - this.x;
+                const dy = py - this.y;
+                return (dx * dx + dy * dy) <= (this.radius * this.radius);
+            }
+        }
+
+        // --- PARTICLE CLASS ---
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.radius = Math.random() * 4 + 2;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 7 + 2;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.alpha = 1;
+                this.decay = Math.random() * 0.03 + 0.02;
+                this.color = color;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += 0.12;
+                this.alpha -= this.decay;
+            }
+
+            draw(c) {
+                c.save();
+                c.globalAlpha = Math.max(0, this.alpha);
+                c.beginPath();
+                c.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                c.fillStyle = this.color;
+                c.fill();
+                c.restore();
+            }
+        }
+
+        // --- FLOATING TEXT CLASS ---
+        class FloatingText {
+            constructor(x, y, text, color) {
+                this.x = x;
+                this.y = y;
+                this.text = text;
+                this.color = color;
+                this.alpha = 1;
+                this.vy = -2;
+            }
+
+            update() {
+                this.y += this.vy;
+                this.alpha -= 0.025;
+            }
+
+            draw(c) {
+                c.save();
+                c.globalAlpha = Math.max(0, this.alpha);
+                c.font = '900 22px -apple-system, sans-serif';
+                c.fillStyle = this.color;
+                c.textAlign = 'center';
+                c.fillText(this.text, this.x, this.y);
+                c.restore();
+            }
+        }
+
+        // --- GAME ACTIONS ---
+        function spawnBurst(x, y, isCorrect) {
+            const colors = isCorrect 
+                ? ['#FFC72C', '#ffffff', '#4F2683', '#38bdf8']
+                : ['#ef4444', '#f87171', '#991b1b'];
+            for (let i = 0; i < 24; i++) {
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        function handlePop(bubble, index) {
+            totalAttempts++;
+
+            if (bubble.isCorrect) {
+                audio.playPop();
+                score += 10;
+                correctPops++;
+                spawnBurst(bubble.x, bubble.y, true);
+                floatingTexts.push(new FloatingText(bubble.x, bubble.y, '+10', '#FFC72C'));
+                bubbles.splice(index, 1);
+            } else {
+                audio.playError();
+                score = Math.max(0, score - 5);
+                incorrectPops++;
+                bubble.isRed = true;
+                bubble.shake = 12;
+                spawnBurst(bubble.x, bubble.y, false);
+                floatingTexts.push(new FloatingText(bubble.x, bubble.y, '-5', '#ef4444'));
+
+                triggerPenaltyModal(bubble.text);
+
+                setTimeout(() => {
+                    const idx = bubbles.indexOf(bubble);
+                    if (idx !== -1) bubbles.splice(idx, 1);
+                }, 350);
+            }
+
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('scoreDisplay').innerText = score;
+            document.getElementById('timerDisplay').innerText = `${timeLeft}s`;
+            const pct = (timeLeft / 60) * 100;
+            document.getElementById('progressBar').style.width = `${pct}%`;
+        }
+
+        function triggerPenaltyModal(itemText) {
+            gameState = 'PAUSED_PENALTY';
+            document.getElementById('penaltyQuote').innerText = `"${itemText}"`;
+            document.getElementById('penaltyModal').classList.remove('hidden');
+
+            penaltySecondsLeft = 5;
+            document.getElementById('penaltyCountdown').innerText = penaltySecondsLeft;
+
+            if (penaltyTimer) clearInterval(penaltyTimer);
+            penaltyTimer = setInterval(() => {
+                penaltySecondsLeft--;
+                document.getElementById('penaltyCountdown').innerText = penaltySecondsLeft;
+                if (penaltySecondsLeft <= 0) {
+                    dismissPenaltyModal();
+                }
+            }, 1000);
+        }
+
+        function dismissPenaltyModal() {
+            if (penaltyTimer) clearInterval(penaltyTimer);
+            document.getElementById('penaltyModal').classList.add('hidden');
+            if (timeLeft > 0 && gameState === 'PAUSED_PENALTY') {
+                gameState = 'PLAYING';
+            }
+        }
+
+        document.getElementById('dismissPenaltyBtn').addEventListener('click', dismissPenaltyModal);
+
+        // --- CHEAT SHEET MODAL TOGGLES ---
+        function openCheatSheet() {
+            stateBeforeCheat = gameState;
+            gameState = 'CHEAT_SHEET';
+            document.getElementById('cheatSheetModal').classList.remove('hidden');
+        }
+
+        function closeCheatSheet() {
+            document.getElementById('cheatSheetModal').classList.add('hidden');
+            if (stateBeforeCheat === 'PLAYING' && timeLeft > 0) {
+                gameState = 'PLAYING';
+            } else if (stateBeforeCheat === 'START') {
+                gameState = 'START';
+            } else if (stateBeforeCheat === 'GAMEOVER') {
+                gameState = 'GAMEOVER';
+            } else {
+                gameState = stateBeforeCheat;
+            }
+        }
+
+        document.getElementById('cheatSheetBtn').addEventListener('click', openCheatSheet);
+        document.getElementById('startCheatBtn').addEventListener('click', openCheatSheet);
+        document.getElementById('endCheatBtn').addEventListener('click', openCheatSheet);
+        document.getElementById('closeCheatBtn').addEventListener('click', closeCheatSheet);
+
+        // --- START & END GAME LOGIC ---
+        function startGame() {
+            audio.init();
+            score = 0;
+            timeLeft = 60;
+            correctPops = 0;
+            incorrectPops = 0;
+            totalAttempts = 0;
+            bubbles = [];
+            particles = [];
+            floatingTexts = [];
+            spawnInterval = 60;
+
+            updateUI();
+
+            document.getElementById('startModal').classList.add('hidden');
+            document.getElementById('gameOverModal').classList.add('hidden');
+            document.getElementById('penaltyModal').classList.add('hidden');
+            document.getElementById('cheatSheetModal').classList.add('hidden');
+
+            gameState = 'PLAYING';
+
+            if (mainTimer) clearInterval(mainTimer);
+            mainTimer = setInterval(() => {
+                if (gameState === 'PLAYING') {
+                    timeLeft--;
+                    updateUI();
+
+                    if (timeLeft % 12 === 0 && spawnInterval > 28) {
+                        spawnInterval -= 6;
+                    }
+
+                    if (timeLeft <= 0) {
+                        endGame();
+                    }
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            gameState = 'GAMEOVER';
+            if (mainTimer) clearInterval(mainTimer);
+            audio.playEnd();
+
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('wiu_spe_game_high', highScore.toString());
+            }
+
+            const accuracy = totalAttempts > 0 
+                ? Math.round((correctPops / totalAttempts) * 100) 
+                : 100;
+
+            document.getElementById('finalScore').innerText = score;
+            document.getElementById('finalAccuracy').innerText = `${accuracy}%`;
+            document.getElementById('finalCorrect').innerText = correctPops;
+            document.getElementById('finalIncorrect').innerText = incorrectPops;
+
+            const endTitle = document.getElementById('endTitle');
+            const endFeedback = document.getElementById('endFeedback');
+
+            if (score >= 160 && accuracy >= 80) {
+                endTitle.innerText = "WIU Special Ed Champion! 🏆";
+                endFeedback.innerText = "Outstanding! You clearly recognize the amazing hands-on motor clinics, flexible assignments, and goofy, accessible faculty WIU offers!";
+            } else if (score >= 90) {
+                endTitle.innerText = "WIU Special Ed Enthusiast! ⭐";
+                endFeedback.innerText = "Great job! You spotted most of WIU's unique program strengths. Keep spreading the word!";
+            } else {
+                endTitle.innerText = "WIU Special Ed Scholar! 📚";
+                endFeedback.innerText = "Nice try! Review the Program Cheat Sheet to learn all about WIU's high collaboration and dedicated field work!";
+            }
+
+            document.getElementById('gameOverModal').classList.remove('hidden');
+        }
+
+        document.getElementById('startGameBtn').addEventListener('click', startGame);
+        document.getElementById('restartGameBtn').addEventListener('click', startGame);
+
+        // --- POINTER / CLICK INTERACTION ---
+        function handlePointer(e) {
+            if (gameState !== 'PLAYING') return;
+
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            const px = clientX - rect.left;
+            const py = clientY - rect.top;
+
+            for (let i = bubbles.length - 1; i >= 0; i--) {
+                if (bubbles[i].contains(px, py)) {
+                    handlePop(bubbles[i], i);
+                    break;
+                }
+            }
+        }
+
+        canvas.addEventListener('pointerdown', handlePointer);
+
+        // Sound Mute Toggle Button
+        const soundBtn = document.getElementById('soundBtn');
+        soundBtn.addEventListener('click', () => {
+            audio.muted = !audio.muted;
+            soundBtn.innerText = audio.muted ? '領域' : '🔊';
+            soundBtn.innerText = audio.muted ? '🔇' : '🔊';
+            if (!audio.muted) audio.init();
+        });
+
+        // --- MAIN GAME ANIMATION LOOP ---
+        function resolveCollisions() {
+            for (let i = 0; i < bubbles.length; i++) {
+                for (let j = i + 1; j < bubbles.length; j++) {
+                    const b1 = bubbles[i];
+                    const b2 = bubbles[j];
+
+                    const dx = b2.x - b1.x;
+                    const dy = b2.y - b1.y;
+                    const distance = Math.hypot(dx, dy);
+                    const minDistance = b1.radius + b2.radius + 12; // Includes spacing cushion
+
+                    if (distance < minDistance) {
+                        // Gentle repulsive push to separate overlapping bubbles
+                        const overlap = minDistance - distance;
+                        const nx = (dx / (distance || 1));
+                        const ny = (dy / (distance || 1));
+
+                        // Adjust horizontal velocities and position base offsets
+                        const pushForce = overlap * 0.08;
+                        b1.vx -= nx * pushForce;
+                        b2.vx += nx * pushForce;
+
+                        // Slight vertical adjustment if needed
+                        b1.y -= ny * pushForce * 0.3;
+                        b2.y += ny * pushForce * 0.3;
+                    }
+                }
+            }
+        }
+
+        function loop() {
+            ctx.clearRect(0, 0, width, height);
+
+            if (gameState === 'PLAYING' || gameState === 'PAUSED_PENALTY' || gameState === 'CHEAT_SHEET') {
+                if (gameState === 'PLAYING') {
+                    spawnCounter++;
+                    if (spawnCounter >= spawnInterval) {
+                        if (bubbles.length < 9) { // Maintain comfortable density
+                            bubbles.push(new Bubble());
+                        }
+                        spawnCounter = 0;
+                    }
+
+                    // Resolve anti-overlap physics between all active bubbles
+                    resolveCollisions();
+                }
+
+                // Render & Update Bubbles
+                for (let i = bubbles.length - 1; i >= 0; i--) {
+                    const b = bubbles[i];
+                    if (gameState === 'PLAYING') {
+                        b.update();
+                    }
+                    b.draw(ctx);
+
+                    if (b.y < -b.radius * 2) {
+                        bubbles.splice(i, 1);
+                    }
+                }
+
+                // Render Particles
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.update();
+                    p.draw(ctx);
+                    if (p.alpha <= 0) particles.splice(i, 1);
+                }
+
+                // Render Floating Score Popups
+                for (let i = floatingTexts.length - 1; i >= 0; i--) {
+                    const ft = floatingTexts[i];
+                    ft.update();
+                    ft.draw(ctx);
+                    if (ft.alpha <= 0) floatingTexts.splice(i, 1);
+                }
+            }
+
+            requestAnimationFrame(loop);
+        }
+
+        // Start animation loop on window load
+        window.onload = function() {
+            loop();
+        };
+    </script>
+</body>
+</html>
